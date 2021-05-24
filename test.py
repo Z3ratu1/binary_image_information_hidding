@@ -13,8 +13,9 @@ def encode(sourcefile, targetfile, secretfile):
 
     secret_bin = ""
     for c in secret:
-        secret_bin += '0' + str(bin(ord(c)))[2:]
-
+        # 补到八位
+        secret_bin += str(bin(ord(c)))[2:].rjust(8, '0')
+    # print(secret_bin)
     source = Image.open(sourcefile)
     if source.mode != "1":
         print("[!]非二值图像，无法进行信息隐藏，使用convert函数进行图像转换")
@@ -73,6 +74,7 @@ def decode(sourcefile):
             first_pixel = p
             result += str(cnt % 2)
             cnt = 1
+    # print(result)
     result = result[:len(result) - len(result) % 8]
     plain = ""
     for i in range(0, len(result), 8):
@@ -83,6 +85,7 @@ def decode(sourcefile):
     return plain
 
 
+convert("source.png")
 encode("source.png", "result.png", "secret.txt")
 plain = decode("result.png")
 print(plain)
