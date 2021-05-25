@@ -18,7 +18,7 @@ def encode(sourcefile, targetfile, secretfile):
     # print(secret_bin)
     source = Image.open(sourcefile)
     if source.mode != "1":
-        print("[!]非二值图像，无法进行信息隐藏，使用convert函数进行图像转换")
+        print("[!] 非二值图像，无法进行信息隐藏，使用convert函数进行图像转换")
         exit(1)
     # 记一下行数到时候好还原图片
     row = len(np.array(source))
@@ -41,7 +41,7 @@ def encode(sourcefile, targetfile, secretfile):
     # 插入数据
     first_pixel = image_content[0]
     if len(secret_bin) > len(distance):
-        print("[!]游程数过少，信息无法完全写入")
+        print("[!] 游程数过少，信息无法完全写入")
     else:
         # 向右补充到和游程数一致，防止出现无效信息直接全部填0截断掉
         index = -1  # 下标从0开始
@@ -63,6 +63,8 @@ def encode(sourcefile, targetfile, secretfile):
 
 def decode(sourcefile):
     image = Image.open(sourcefile)
+    if image.mode != "1":
+        print("[!] 非二值图像，信息隐藏结果提取可能有误")
     image_content = np.array(image).reshape(-1)
     first_pixel = image_content[0]
     cnt = 0
@@ -79,13 +81,23 @@ def decode(sourcefile):
     plain = ""
     for i in range(0, len(result), 8):
         plain += chr(int(result[i:i+8], 2))
+    # 丢弃不可见字符
     for i in range(len(plain)):
         if not plain[i].isprintable():
             return plain[:i]
     return plain
 
 
-convert("source.png")
-encode("source.png", "result.png", "secret.txt")
-plain = decode("result.png")
-print(plain)
+# convert("source.png")
+# encode("source.png", "result.png", "secret.txt")
+plain_origin = decode("result.png")
+print("[+] 原始加密图片解密: " + plain_origin)
+plain_screenshot = decode("screenshot.png")
+print("[+] 图片截图后解密: " + plain_screenshot)
+plain_rotate = decode("rotation.png")
+print("[+] 图片旋转后解密: " + plain_rotate)
+plain_convert = decode("convert.png")
+print("[+] 图片转换格式后解密: " + plain_convert)
+plain_crop = decode("crop.png")
+print("[+] 裁剪后的图像解密:" + plain_crop)
+
